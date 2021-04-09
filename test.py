@@ -33,38 +33,49 @@ from RK_functions import RK_func as RK
 casBDT_cut = RK.get_default_casBDT_cut()
 
 signal = uproot3.open("tuples/sim09g_Kee_truthed_2018_preselec.root")["DecayTree"]
-cascade = uproot3.open("tuples/cascades_truthed_2018_preselec.root")["DecayTree"]
+cascade1 = uproot3.open("tuples/Bu_D0enu_Kenu2018_truthed_preselec.root")["DecayTree"]
+cascade3 = uproot3.open("tuples/Bu_D0pi_Kenu2018_truthed_preselec.root")["DecayTree"]
 kemu = uproot3.open("tuples/B2Kemu_Strip34_2018_customPresel_highq2_triggered.root")["DecayTree"]
 Prc = uproot3.open("tuples/Kstee2018_truthed_preselec.root")["DecayTree"]
 kpipi = uproot3.open("tuples/B2Kpipi_truthed_2018_preslec.root")["DecayTree"] 
 
-a_signal = signal.arrays(RK.get_standard_columns()+RK.get_trigger_weight_columns())
-a_cascade = cascade.arrays(RK.get_standard_columns())
+a_signal = signal.arrays(RK.get_standard_columns()+RK.get_trigger_weight_columns()+['misPIDweight'])
+a_cascade1 = cascade1.arrays(RK.get_standard_columns())
+a_cascade3 = cascade3.arrays(RK.get_standard_columns())
 a_kemu = kemu.arrays(RK.get_kemu_columns())
-a_Prc = Prc.arrays(RK.get_standard_columns()+RK.get_trigger_weight_columns())
+a_Prc = Prc.arrays(RK.get_standard_columns()+RK.get_trigger_weight_columns()+['misPIDweight','misPIDweight_SwaveWeight'])
 a_kpipi = kpipi.arrays(RK.get_standard_columns()+['misPIDweight'])
 
-data_labels = ['Signal', 'Cascades', 'Kemu', 'Prc', 'Kpipi']
-data_list = [a_signal, a_cascade, a_kemu, a_Prc, a_kpipi]
+data_labels = ['Signal', 'Cascade1', 'Cascade3', 'Kemu', 'Prc', 'Kpipi']
+data_list = [a_signal, a_cascade1, a_cascade3, a_kemu, a_Prc, a_kpipi]
 
-plt.figure(figsize=(8,4))
+# contaminations = RK.get_contaminations(a_signal, a_cascade1, a_cascade3, a_Prc, a_kpipi, CasWindow=True, CasMkl=True, CasBDT=False)
+# contaminations = RK.get_contaminations(a_signal, a_cascade1, a_cascade3, a_Prc, a_kpipi, CasWindow=True, CasMkl=False, CasBDT=False)
+# contaminations = RK.get_contaminations(a_signal, a_cascade1, a_cascade3, a_Prc, a_kpipi, CasWindow=False, CasMkl=False, CasBDT=True)
 
-ax = plt.subplot(1,2,1)
-for idx, array_i in enumerate([a_signal, a_cascade, a_kemu, a_Prc, a_kpipi]):
-	plt.hist(array_i[b"Kemu_MKl"], bins=50, range=[600,5000], label=data_labels[idx], histtype='step', density='True')
-plt.text(0.05, 0.95,'Before selection',horizontalalignment='left',verticalalignment='top',transform = ax.transAxes, fontsize=10)
-plt.xlabel('m(Ke)')
-ax = plt.subplot(1,2,2)
-for idx, array_i in enumerate([a_signal, a_cascade, a_kemu, a_Prc, a_kpipi]):
-	if data_labels[idx] == 'Kemu':
-		where = RK.full_selection(array_i, casBDT_cut=0.56, combiBDT=True, Bmass=True, CasWindow=False, CasMkl=False, CasBDT=False, PID=False, PID_Kemu=True)
-	else:
-		where = RK.full_selection(array_i, casBDT_cut=0.56, combiBDT=True, Bmass=True, CasWindow=False, CasMkl=False, CasBDT=False, PID=True, PID_Kemu=False)
-	plt.hist(array_i[b"Kemu_MKl"][where], bins=50, range=[600,5000], label=data_labels[idx], histtype='step', density='True')
-plt.text(0.05, 0.95,'After selection',horizontalalignment='left',verticalalignment='top',transform = ax.transAxes, fontsize=10)
-plt.xlabel('m(Ke)')
-plt.legend()
-plt.show()
+weights_list = RK.compute_weights_list(a_signal, a_cascade1, a_cascade3, a_Prc, a_kpipi, CasWindow=False, CasMkl=False, CasBDT=True)
+
+
+
+
+
+# plt.figure(figsize=(8,4))
+# ax = plt.subplot(1,2,1)
+# for idx, array_i in enumerate([a_signal, a_cascade, a_kemu, a_Prc, a_kpipi]):
+# 	plt.hist(array_i[b"Kemu_MKl"], bins=50, range=[600,5000], label=data_labels[idx], histtype='step', density='True')
+# plt.text(0.05, 0.95,'Before selection',horizontalalignment='left',verticalalignment='top',transform = ax.transAxes, fontsize=10)
+# plt.xlabel('m(Ke)')
+# ax = plt.subplot(1,2,2)
+# for idx, array_i in enumerate([a_signal, a_cascade, a_kemu, a_Prc, a_kpipi]):
+# 	if data_labels[idx] == 'Kemu':
+# 		where = RK.full_selection(array_i, casBDT_cut=0.56, combiBDT=True, Bmass=True, CasWindow=False, CasMkl=False, CasBDT=False, PID=False, PID_Kemu=True)
+# 	else:
+# 		where = RK.full_selection(array_i, casBDT_cut=0.56, combiBDT=True, Bmass=True, CasWindow=False, CasMkl=False, CasBDT=False, PID=True, PID_Kemu=False)
+# 	plt.hist(array_i[b"Kemu_MKl"][where], bins=50, range=[600,5000], label=data_labels[idx], histtype='step', density='True')
+# plt.text(0.05, 0.95,'After selection',horizontalalignment='left',verticalalignment='top',transform = ax.transAxes, fontsize=10)
+# plt.xlabel('m(Ke)')
+# plt.legend()
+# plt.show()
 
 
 
